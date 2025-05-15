@@ -934,7 +934,7 @@ class RecordTable(DataSet):
             folder_export = os.path.dirname(self.file_data)
             # convert and overwrite layer
             gdf = gpd.GeoDataFrame(self.data)
-            gdf.to_file(Path(f"{folder_export}/{filename}"), layer=self.layer_db, driver="GPKG")
+            gdf.to_file(Path(f"{folder_export}/{filename}.gpkg"), layer=self.layer_db, driver="GPKG")
             return True
         else:
             return False
@@ -1275,7 +1275,7 @@ class RecordTable(DataSet):
 
     def view(self, filter_status=True):
         df = self.data.copy()
-        df = df.query(f"{self.recstatus_field} == 'On'").copy()
+        df = df.query(f"{self.recstatus_field} == 'On'").copy().reset_index(drop=True)
         df.drop(columns=self.columns_base, inplace=True)
         return df
 
