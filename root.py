@@ -931,12 +931,13 @@ class RecordTable(DataSet):
             # handle filename
             filename = os.path.basename(self.file_data).split(".")[0]
             # handle folder
-            self.export(
-                folder_export=os.path.dirname(self.file_data), filename=filename
-            )
-            return 0
+            folder_export = os.path.dirname(self.file_data)
+            # convert and overwrite layer
+            gdf = gpd.GeoDataFrame(self.data)
+            gdf.to_file(Path(f"{folder_export}/{filename}"), layer=self.layer_db, driver="GPKG")
+            return True
         else:
-            return 1
+            return False
 
     def export(self, folder_export=None, filename=None, filter_archive=False):
         """Export the ``RecordTable`` data.
@@ -967,10 +968,10 @@ class RecordTable(DataSet):
                 df = self.data.copy()
             # filter default columns:
             df = df[self._get_organized_columns()]
-            df.to_csv(filepath, sep=self.file_data_sep, index=False)
+            df.to_csv(filepath, sep=self.file_data_sep, index=False, encoding="utf-8")
             return filepath
         else:
-            return 1
+            return None
 
     def set(self, dict_setter, load_data=True):
         """Set selected attributes based on an incoming dictionary.
@@ -1274,7 +1275,7 @@ class RecordTable(DataSet):
 
     def view(self, filter_status=True):
         df = self.data.copy()
-        df = df.query(f"{self.recstatus_field} == 'On'")
+        df = df.query(f"{self.recstatus_field} == 'On'").copy()
         df.drop(columns=self.columns_base, inplace=True)
         return df
 
@@ -1548,21 +1549,52 @@ def get_layer_names():
     return list(get_tables().keys())
 
 def load_db(folder):
-    print(">> loading database ...")
+    print(">> carregando dados ...")
     # retrieve latest version
     ls_files = glob.glob(f"{folder}/pishne_db_*.gpkg")
-    ls_files.sort()
-    file_db = Path(ls_files[-1])  # get the lastest
+    if len(ls_files) > 0:
+        print("Ok. Arquivo encontrado na pasta.")
+        ls_files.sort()
+        file_db = Path(ls_files[-1])  # get the lastest
+        # instantiate dictionary for holding tables
+        dc_db = get_tables()
+        # list layers
+        ls_layers = get_layer_names()
+        # loop over
+        for layer in ls_layers:
+            dc_db[layer].load_data(file_data=file_db, layer=layer)
+        print("Dados carregados.")
+        return dc_db
+    else:
+        print("Atenção! Arquivo do banco de dados não encontrado.")
+        return None
 
-    # instantiate dictionary for holding tables
-    dc_db = get_tables()
-    # list layers
-    ls_layers = get_layer_names()
-    # loop over
-    for layer in ls_layers:
-        dc_db[layer].load_data(file_data=file_db, layer=layer)
+def join_db(db):
+    # obter dados
+    gdf_acoes = db["acoes"].view(filter_status=True)
+    gdf_subc = db["subcomponentes"].view(filter_status=True)
+    gdf_comp = db["componentes"].view(filter_status=True)
 
-    return dc_db
+    # unir acoes com subcomponentes
+    df1 = pd.merge(left=gdf_acoes, right=gdf_subc, on="cod_subcomponente", how="left", suffixes=('', '_drop'))
+    df1.drop([col for col in df1.columns if 'drop' in col], axis=1, inplace=True)
+
+    # unir acoes com componentes
+    df_uniao = pd.merge(left=df1, right=gdf_comp, on="cod_componente", how="left", suffixes=('', '_drop'))
+    df_uniao.drop([col for col in df_uniao.columns if 'drop' in col], axis=1, inplace=True)
+
+    # reorganizar ordem das colunas
+    c1 = list(df_uniao.columns)
+    c2 = c1[0:1] + c1[-2:] + c1[1:2] + c1[-3:-2] + c1[2:-3]
+    df_uniao = df_uniao[c2]
+
+    return df_uniao
+
+def export_db2csv(db, folder, filename):
+    jdf = join_db(db)
+    jdf.to_csv(f"{folder}/{filename}.csv", sep=";", index=False, encoding="utf-8")
+
+
 
 # deprecated
 def __setup_db(folder):
