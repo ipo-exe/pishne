@@ -1498,7 +1498,7 @@ class AcoesRT(RecordTable):
         return None
 
     def gui_filter_value(self):
-        from gui import slider_filter
+        from pishne.gui import slider_filter
         df = self.data[self.columns_data_main]
         slider_filter(df=df, column="valor_investimento")
 
