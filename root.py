@@ -6,8 +6,6 @@ from pathlib import Path
 import geopandas as gpd
 import pandas as pd
 
-from gui import create_dynamic_form
-
 
 class MbaE:
     """
