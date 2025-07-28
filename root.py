@@ -79,7 +79,7 @@ class MbaE:
 
         """
         # ------------ pseudo-static ----------- #
-
+        # test
         #
         self.object_name = self.__class__.__name__
         self.object_alias = "mbae"
