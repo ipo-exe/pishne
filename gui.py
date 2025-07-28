@@ -30,11 +30,9 @@ def slider_filter(df, column, label1="Filtrados", label2="Total"):
 
             # Summary
             count = len(current_filtered)
-            total_sum = round(current_filtered[column].sum(), 2)
             summary_html = f"""
                 <h4>Resumo</h4>
                 <p><b>{label1}:</b> {count}</p>
-                <p><b>{label2}:</b> {total_sum}</p>
                 """
             display(HTML(summary_html))
             display(current_filtered)
@@ -55,6 +53,7 @@ def slider_filter(df, column, label1="Filtrados", label2="Total"):
     # Layout
     ui = VBox([min_slider, max_slider, export_button, output])
     display(ui)
+
 
 
 def dropdown_filter(df, column, label1="Filtrados", label2="Total", value_column=None, contains=False, options=None):
@@ -96,11 +95,9 @@ def dropdown_filter(df, column, label1="Filtrados", label2="Total", value_column
             <p><b>{label1}:</b> {count}</p>
             """
             if value_column is not None:
-                total_sum = round(current_filtered[value_column].sum(), 2)
                 summary_html = f"""
                 <h4>Resumo</h4>
                 <p><b>{label1}:</b> {count}</p>
-                <p><b>{label2}:</b> {total_sum}</p>
                 """
 
             display(HTML(summary_html))
@@ -276,7 +273,7 @@ def action_form(db, df):
     options_escala = db["escala"].data["escala_acao"].unique() + ["Mix de Estados (preencher abaixo)"]
     escala_acao = Dropdown(
         options=options_escala,
-        value="Nordeste (cárater regional)",
+        value=options_escala[0],
         description='Escala:',
         layout=Layout(width='800px'),
         style={'description_width': '200px'}
