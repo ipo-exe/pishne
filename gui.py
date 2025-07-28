@@ -39,7 +39,7 @@ def slider_filter(df, column, label1="Filtrados", label2="Total"):
 
     def export_csv(b):
         filename = "filtered_data.csv"
-        current_filtered.to_csv(filename, index=False)
+        current_filtered.to_csv(filename, index=False, sep=";", encoding="utf-8")
         files.download(filename)
 
     # Link events
@@ -55,7 +55,7 @@ def slider_filter(df, column, label1="Filtrados", label2="Total"):
     display(ui)
 
 
-def dropdown_filter(df, column, label1="Filtrados"):
+def dropdown_filter(df, column, label1="Filtrados", label2="Total", value_column=None, contains=False):
     """
     Creates a dropdown filter for a qualitative column.
     Displays summary and allows CSV export of the filtered data.
@@ -79,7 +79,12 @@ def dropdown_filter(df, column, label1="Filtrados"):
             if dropdown.value == 'All':
                 current_filtered = df
             else:
-                current_filtered = df[df[column] == dropdown.value]
+                if contains:
+                    # Case-insensitive substring match
+                    current_filtered = df[df[column].astype(str).str.contains(dropdown.value, case=False, na=False)]
+                else:
+                    current_filtered = df[df[column] == dropdown.value]
+
 
             # Summary
             count = len(current_filtered)
@@ -87,13 +92,20 @@ def dropdown_filter(df, column, label1="Filtrados"):
             <h4>Resumo</h4>
             <p><b>{label1}:</b> {count}</p>
             """
-            display(HTML(summary_html))
+            if value_column is not None:
+                total_sum = round(current_filtered[value_column].sum(), 2)
+                summary_html = f"""
+                <h4>Resumo</h4>
+                <p><b>{label1}:</b> {count}</p>
+                <p><b>{label2}:</b> {total_sum}</p>
+                """
+
             display(HTML(summary_html))
             display(current_filtered)
 
     def export_csv(b):
         filename = "filtered_data.csv"
-        current_filtered.to_csv(filename, index=False)
+        current_filtered.to_csv(filename, index=False, sep=";", encoding="utf-8")
         files.download(filename)
 
     # Link events
@@ -106,3 +118,17 @@ def dropdown_filter(df, column, label1="Filtrados"):
     # Layout
     ui = VBox([dropdown, export_button, output])
     display(ui)
+
+
+def download(df, filename="data.csv"):
+    """
+    Creates a simple button to download the entire DataFrame as CSV.
+    """
+    export_button = Button(description="Download CSV", button_style='success')
+
+    def export_csv(b):
+        df.to_csv(filename, index=False, sep=";", encoding="utf-8")
+        files.download(filename)
+
+    export_button.on_click(export_csv)
+    display(export_button)

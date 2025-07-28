@@ -1610,22 +1610,31 @@ def gui_filter_value(db):
     )
 
 
-def gui_filter_category(df, col):
+def gui_filter_category(df, col, contains):
     from pishne.gui import dropdown_filter
     dropdown_filter(
         df=df,
         column=col,
         label1="Ações filtradas",
+        label2="Total R$ (Mi)",
+        value_column="valor_investimento",
+        contains=contains
     )
 
 def gui_filter(db, field):
     dc = {
         "Temática": "nm_tematica",
         "Componente": "nm_componente",
-        "Subcomponente":"cod_subcomponente"
+        "Subcomponente":"cod_subcomponente",
+        "Origem": "origem_investimento",
+        "Escala": "escala_acao"
     }
     df = join_db(db=db)
-    gui_filter_category(df=df, col=dc[field])
+    column = dc[field]
+    b_contains = False
+    if column == "escala_acao":
+        b_contains = True
+    gui_filter_category(df=df, col=dc[field], contains=b_contains)
 
 
 
