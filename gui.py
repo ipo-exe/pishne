@@ -21,7 +21,7 @@ def slider_filter(df, column):
 
         # Summary
         count = len(current_filtered)
-        total_sum = round(filtered[column].sum(), 2)
+        total_sum = round(current_filtered[column].sum(), 2)
         # Display summary
         summary_html = f"""
                     <h4>Resumo</h4>
@@ -36,7 +36,7 @@ def slider_filter(df, column):
     def export_csv(b):
         # Save filtered DataFrame to a CSV file
         filename = "dados_filtrados.csv"
-        current_filtered.to_csv(filename, index=False)
+        current_filtered.to_csv(filename, index=False, sep=";", encoding="utf-8")
         from google.colab import files
         files.download(filename)
 
