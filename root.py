@@ -1775,6 +1775,8 @@ def summarize(db, subset):
     }, inplace=True)
     df_ups.sort_values(by="soma", inplace=True, ascending=False)
     df_ups.reset_index(drop=True, inplace=True)
+    v1 = df_ups["soma"].sum()
+    v2 = df_ups["contagem"].sum()
     df_extra = pd.DataFrame(
         {
             subset: ["totais"],
@@ -1784,10 +1786,10 @@ def summarize(db, subset):
     )
     df_ups = pd.concat([df_ups, df_extra])
     df_ups["unidade"] = "Mi R$"
-    v = df_ups["soma"].sum()
-    df_ups["soma_percent"] = 100 * df_ups["soma"] / v
-    v = df_ups["contagem"].sum()
-    df_ups["contagem_percent"] = 100 * df_ups["contagem"] / v
+    df_ups["soma_percent"] = 100 * df_ups["soma"] / v1
+    df_ups["soma_percent"] = df_ups["soma_percent"].round(2)
+    df_ups["contagem_percent"] = 100 * df_ups["contagem"] / v2
+    df_ups["contagem_percent"] = df_ups["contagem_percent"].round(2)
     df_ups = df_ups[[subset, "contagem", "contagem_percent", "soma", "soma_percent", "unidade"]].copy()
     # enhance dataframe
     if subset == "cod_componente":
