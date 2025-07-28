@@ -9,48 +9,45 @@ def slider_filter(df, column):
     min_val = int(df[column].min())
     max_val = int(df[column].max())
 
+    # Widgets
+    min_slider = IntSlider(value=min_val, min=min_val, max=max_val, step=1, description='Min')
+    max_slider = IntSlider(value=max_val, min=min_val, max=max_val, step=1, description='Max')
     export_button = Button(description="Download CSV", button_style='success')
+    output = Output()
 
-    # Variable to store the current filtered dataframe
+    # Variable to store filtered data
     current_filtered = df.copy()
 
-    def filter_data(min_value, max_value):
+    def update_display(*args):
         nonlocal current_filtered
-        # Filter
-        current_filtered = df[(df[column] >= min_value) & (df[column] <= max_value)]
+        with output:
+            output.clear_output()
+            current_filtered = df[(df[column] >= min_slider.value) & (df[column] <= max_slider.value)]
 
-        # Summary
-        count = len(current_filtered)
-        total_sum = round(current_filtered[column].sum(), 2)
-        # Display summary
-        summary_html = f"""
-                    <h4>Resumo</h4>
-                    <p><b>Ações filtradas:</b> {count}</p>
-                    <p><b>Total filtrado: R$ (Mi) </b> {total_sum}</p>
-                    """
-        display(HTML(summary_html))
-
-        # Show filtered data
-        display(current_filtered)
+            # Summary
+            count = len(current_filtered)
+            total_sum = current_filtered[column].sum()
+            summary_html = f"""
+                <h4>Summary</h4>
+                <p><b>Rows:</b> {count}</p>
+                <p><b>Sum of {column}:</b> {total_sum}</p>
+                """
+            display(HTML(summary_html))
+            display(current_filtered)
 
     def export_csv(b):
-        # Save filtered DataFrame to a CSV file
-        filename = "dados_filtrados.csv"
-        current_filtered.to_csv(filename, index=False, sep=";", encoding="utf-8")
-        from google.colab import files
+        filename = "filtered_data.csv"
+        current_filtered.to_csv(filename, index=False)
         files.download(filename)
 
-    # Attach button event
+    # Link events
+    min_slider.observe(update_display, 'value')
+    max_slider.observe(update_display, 'value')
     export_button.on_click(export_csv)
 
-    # Create the UI
-    ui = VBox([
-        interact(
-            filter_data,
-            min_value=IntSlider(value=min_val, min=min_val, max=max_val, step=1, description='Min'),
-            max_value=IntSlider(value=max_val, min=min_val, max=max_val, step=1, description='Max')
-        ),
-        export_button
-    ])
+    # Initial display
+    update_display()
 
+    # Layout
+    ui = VBox([min_slider, max_slider, export_button, output])
     display(ui)
