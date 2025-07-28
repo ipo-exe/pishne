@@ -1278,9 +1278,12 @@ class RecordTable(DataSet):
         df.to_csv(filepath, sep=self.file_data_sep, index=False)
         return filepath
 
-    def view(self, filter_status=True):
+    def view(self, filter_status=True, recent=None):
         df = self.data.copy()
         df = df.query(f"{self.recstatus_field} == 'On'").copy().reset_index(drop=True)
+        if recent is not None:
+            df = df.sort_values(by="RecTimestamp", ascending=False)
+            df = df.head(recent)
         df.drop(columns=self.columns_base, inplace=True)
         return df
 
@@ -1713,9 +1716,11 @@ def join_db(db):
 
 def expand_db(db):
     df1 = join_db(db)
+    '''
     print(df1.info())
     print(df1["valor_investimento"].sum())
     print("^^^^^^^^^^^^^^^^^^^^")
+    '''
     ls_ufs = [
         "MA", "PI", "CE", "RN", "PB", "PE", "AL", "SE", "BA"
     ]
@@ -1749,10 +1754,12 @@ def expand_db(db):
 
     df_full = pd.concat(ls_full).reset_index(drop=True)
     df_full = df_full.sort_values(by="cod_acao").reset_index(drop=True)
+    '''   
     print(df_full.info())
     print(df_full["valor_investimento"].sum())
     print("^^^^^^^^^^^^^^^^^^^^")
     print(df_full.head(20))
+    '''
     return df_full
 
 def summarize(db, subset):
@@ -1781,8 +1788,11 @@ def summarize(db, subset):
     )
     df_ups = pd.concat([df_ups, df_extra])
     df_ups["unidade"] = "Mi R$"
-
-
+    # enhance dataframe
+    if subset == "cod_componente":
+        df_ups = pd.merge(left=df_ups, right=db["componentes"].view(), on=subset, how="left")
+    if subset == "cod_subcomponente":
+        df_ups = pd.merge(left=df_ups, right=db["subcomponentes"].view(), on=subset, how="left")
     return df_ups
 
 
