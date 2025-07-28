@@ -1742,7 +1742,7 @@ def expand_db(db):
         else:
             s_label == "all"
             filtered_df1 = df1[df1['escala_acao'].str.contains(s_escala, case=True, regex=False)].copy()
-            filtered_df1["escala_local"] = s_label
+            filtered_df1["escala_local"] = s_escala
         #print(filtered_df1[["cod_acao", "valor_investimento", "escala_acao", "escala_local"]])
         #print("\n")
         ls_full.append(filtered_df1.copy())
@@ -1756,9 +1756,33 @@ def expand_db(db):
     return df_full
 
 def summarize(db, subset):
+    if subset == "escala_acao":
+        subset = "escala_local"
     df = expand_db(db=db)
+    #print(df[["escala_acao", "escala_local"]].sort_values(by="escala_local").head(20))
     # Aggregate stats of "value" field by "label" field
-    df_ups = df.groupby(subset)['valor_investimento'].agg(['media', 'soma', 'min', 'max', 'count']).reset_index()
+    df_ups = df.groupby(subset)['valor_investimento'].agg(['mean', 'sum', 'min', 'max', 'count']).reset_index()
+    df_ups.rename(columns={
+        "mean": "media",
+        "sum": "soma",
+        "count": "contagem",
+    }, inplace=True)
+    df_ups.sort_values(by="soma", inplace=True, ascending=False)
+    df_ups.reset_index(drop=True, inplace=True)
+    df_extra = pd.DataFrame(
+        {
+            subset: ["totais"],
+            "media": df_ups["media"].mean(),
+            "soma": df_ups["soma"].sum(),
+            "min": df_ups["min"].min(),
+            "max": df_ups["max"].max(),
+            "contagem": df_ups["contagem"].sum(),
+        }
+    )
+    df_ups = pd.concat([df_ups, df_extra])
+    df_ups["unidade"] = "Mi R$"
+
+
     return df_ups
 
 
