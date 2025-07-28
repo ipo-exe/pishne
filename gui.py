@@ -245,7 +245,7 @@ def action_form(db, df):
     # descrição
     desc_acao = Text(
         description='Descrição:',
-        layout=widgets.Layout(width='800px'),
+        layout=Layout(width='800px'),
         style={'description_width': '150px'},
     )
     widgets_dict["desc_acao"] = desc_acao
@@ -254,7 +254,7 @@ def action_form(db, df):
     # valor investimento
     valor_investimento = FloatText(
         description='Investimento (Mi R$):',
-        layout=widgets.Layout(width='800px'),
+        layout=Layout(width='800px'),
         style={'description_width': '150px'},
     )
     widgets_dict['valor_investimento'] = valor_investimento
