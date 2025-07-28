@@ -1614,7 +1614,7 @@ def gui_filter_category(df, col):
     from pishne.gui import dropdown_filter
     dropdown_filter(
         df=df,
-        column=colr,
+        column=col,
         label1="Ações filtradas",
     )
 
