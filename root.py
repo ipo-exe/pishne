@@ -1768,9 +1768,8 @@ def summarize(db, subset):
     df = expand_db(db=db)
     #print(df[["escala_acao", "escala_local"]].sort_values(by="escala_local").head(20))
     # Aggregate stats of "value" field by "label" field
-    df_ups = df.groupby(subset)['valor_investimento'].agg(['mean', 'sum', 'min', 'max', 'count']).reset_index()
+    df_ups = df.groupby(subset)['valor_investimento'].agg(['count', 'sum',]).reset_index()
     df_ups.rename(columns={
-        "mean": "media",
         "sum": "soma",
         "count": "contagem",
     }, inplace=True)
@@ -1779,15 +1778,17 @@ def summarize(db, subset):
     df_extra = pd.DataFrame(
         {
             subset: ["totais"],
-            "media": df_ups["media"].mean(),
             "soma": df_ups["soma"].sum(),
-            "min": df_ups["min"].min(),
-            "max": df_ups["max"].max(),
             "contagem": df_ups["contagem"].sum(),
         }
     )
     df_ups = pd.concat([df_ups, df_extra])
     df_ups["unidade"] = "Mi R$"
+    v = df_ups["soma"].sum()
+    df_ups["soma_percent"] = 100 * df_ups["soma"] / v
+    v = df_ups["contagem"].sum()
+    df_ups["contagem_percent"] = 100 * df_ups["contagem"] / v
+    df_ups = df_ups[[subset, "contagem", "contagem_percent", "soma", "soma_percent", "unidade"]].copy()
     # enhance dataframe
     if subset == "cod_componente":
         df_ups = pd.merge(left=df_ups, right=db["componentes"].view(), on=subset, how="left")
