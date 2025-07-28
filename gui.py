@@ -212,7 +212,7 @@ def action_form(db, df):
     for col in hierarchy:
         widgets_dict[col] = Dropdown(
             description="{}:".format(hierarchy_labels[col]),
-            options=['Select'],
+            options=['Selecionar'],
             layout=Layout(width='800px'),
             style={'description_width': '200px'}
         )
@@ -225,14 +225,14 @@ def action_form(db, df):
             # Filter df based on previous selections
             filtered_df = df.copy()
             for col in hierarchy[:current_idx + 1]:
-                if widgets_dict[col].value != 'Select':
+                if widgets_dict[col].value != 'Selecionar':
                     filtered_df = filtered_df[filtered_df[col] == widgets_dict[col].value]
             next_options = sorted(filtered_df[next_col].dropna().unique().tolist())
-            widgets_dict[next_col].options = ['Select'] + next_options
+            widgets_dict[next_col].options = ['Selecionar'] + next_options
 
             # Reset deeper dropdowns
             for deeper_col in hierarchy[current_idx + 2:]:
-                widgets_dict[deeper_col].options = ['Select']
+                widgets_dict[deeper_col].options = ['Selecionar']
 
     # Attach observers
     for col in hierarchy[:-1]:
@@ -273,7 +273,7 @@ def action_form(db, df):
     options_escala = sorted(db["escala"].data["escala_acao"].unique()) + ["Mix de Estados (preencher abaixo)"]
     escala_acao = Dropdown(
         options=options_escala,
-        value="Nordeste (cárater regional)",
+        value="Mix de Estados (preencher abaixo)",
         description='Escala:',
         layout=Layout(width='800px'),
         style={'description_width': '200px'}
@@ -284,7 +284,7 @@ def action_form(db, df):
     # mix
     mix_estados = Text(
         description="Mix de Estados (ex: 'SE & PE'):",
-        value="SE & PE (exemplo)",
+        value="SE & PE",
         layout=Layout(width='800px'),
         style={'description_width': '200px'},
     )

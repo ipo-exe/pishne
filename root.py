@@ -1753,6 +1753,13 @@ def expand_db(db):
     print(df_full["valor_investimento"].sum())
     print("^^^^^^^^^^^^^^^^^^^^")
     print(df_full.head(20))
+    return df_full
+
+def summarize(db, subset):
+    df = expand_db(db=db)
+    # Aggregate stats of "value" field by "label" field
+    df_ups = df.groupby(subset)['valor_investimento'].agg(['media', 'soma', 'min', 'max', 'count']).reset_index()
+    return df_ups
 
 
 
