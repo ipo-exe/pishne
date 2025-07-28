@@ -217,7 +217,7 @@ def action_form(db, df):
             description="{}:".format(hierarchy_labels[col]),
             options=['Select'],
             layout=Layout(width='800px'),
-            style={'description_width': '150px'}
+            style={'description_width': '200px'}
         )
 
     # Update function for cascading effect
@@ -246,7 +246,7 @@ def action_form(db, df):
     desc_acao = Text(
         description='Descrição:',
         layout=Layout(width='800px'),
-        style={'description_width': '150px'},
+        style={'description_width': '200px'},
     )
     widgets_dict["desc_acao"] = desc_acao
     all_cols = all_cols + ["desc_acao"]
@@ -255,7 +255,7 @@ def action_form(db, df):
     valor_investimento = FloatText(
         description='Investimento (Mi R$):',
         layout=Layout(width='800px'),
-        style={'description_width': '150px'},
+        style={'description_width': '200px'},
     )
     widgets_dict['valor_investimento'] = valor_investimento
     all_cols = all_cols + ['valor_investimento']
@@ -267,18 +267,19 @@ def action_form(db, df):
         value=options_origem[0],
         description='Origem:',
         layout=Layout(width='800px'),
-        style={'description_width': '150px'}
+        style={'description_width': '200px'}
     )
     widgets_dict['origem_investimento'] = origem_investimento
     all_cols = all_cols + ['origem_investimento']
 
     # escala
-    options_escala = sorted(db["escala"].data["escala_acao"].unique()) + ["Mix de Estados (preencher abaixo)"]
+    options_escala = db["escala"].data["escala_acao"].unique() + ["Mix de Estados (preencher abaixo)"]
     escala_acao = Dropdown(
         options=options_escala,
-        value="Todos Estados",
+        value="Bacia do São Francisco",
         description='Escala:',
-        layout=Layout(width='800px'), style={'description_width': '150px'}
+        layout=Layout(width='800px'),
+        style={'description_width': '200px'}
     )
     widgets_dict['escala_acao'] = escala_acao
     all_cols = all_cols + ['escala_acao']
@@ -288,18 +289,18 @@ def action_form(db, df):
         description="Mix de Estados (ex: 'SE & PE'):",
         value="SE & PE (exemplo)",
         layout=Layout(width='800px'),
-        style={'description_width': '150px'},
+        style={'description_width': '200px'},
     )
     widgets_dict["mix"] = mix_estados
     all_cols = all_cols + ["mix"]
 
     # Initial options for the first dropdown
     first_col = hierarchy[0]
-    widgets_dict[first_col].options = ['Select'] + sorted(df[first_col].dropna().unique().tolist())
+    widgets_dict[first_col].options = ['Selecionar'] + sorted(df[first_col].dropna().unique().tolist())
 
     # Submit and capture values
     output = Output()
-    submit_button = Button(description="Submit", button_style="success")
+    submit_button = Button(description="Submeter Ação", button_style="success")
     form_data = {}
 
     def on_submit(b):
@@ -310,7 +311,7 @@ def action_form(db, df):
                 if "cde_" in key:
                     v = v.split(" -- ")[0]
                     key = key.replace("cde_", "cod_")
-                if v == 'Select':
+                if v == 'Selecionar':
                     v = None
                 form_data[key] = v
             # handle mix
@@ -318,7 +319,8 @@ def action_form(db, df):
                 form_data["escala_acao"] = form_data["mix"][:]
                 del form_data["mix"]
 
-            print("Formulário submetido")
+            print(" >>> Formulário submetido.")
+            print(" >>> Consolidar inserção abaixo.")
 
     submit_button.on_click(on_submit)
 
