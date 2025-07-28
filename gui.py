@@ -5,6 +5,7 @@ import pandas as pd
 from google.colab import files
 
 
+
 def slider_filter(df, column, label1="Filtrados", label2="Total"):
     """
     Creates interactive sliders to filter the dataframe based on the column.
@@ -199,8 +200,7 @@ def handle_selection(data):
     return data
 
 
-def action_form(db):
-    df = pishne.join_db(db)
+def action_form(db, df):
 
     df["cde_componente"] = df['cod_componente'] + ' -- ' + df['desc_componente']
     df["cde_subcomponente"] = df['cod_subcomponente'] + ' -- ' + df['desc_subcomponente']

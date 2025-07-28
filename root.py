@@ -1730,7 +1730,7 @@ def gui_filter(db, field):
 
 def gui_form(db):
     from pishne.gui import action_form
-    action_form(db=db)
+    action_form(db=db, df=join_db(db))
 
 
 def export_db2csv(db, use_gui=True, folder=None):
