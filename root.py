@@ -1497,10 +1497,7 @@ class AcoesRT(RecordTable):
             self.refresh_data()
         return None
 
-    def gui_filter_value(self):
-        from pishne.gui import slider_filter
-        df = self.data[self.columns_data_main]
-        slider_filter(df=df, column="valor_investimento")
+
 
 
 
@@ -1600,6 +1597,37 @@ def join_db(db):
     df_uniao = df_uniao[c2]
 
     return df_uniao
+
+
+def gui_filter_value(db):
+    from pishne.gui import slider_filter
+    df = join_db(db=db)
+    slider_filter(
+        df=df,
+        column="valor_investimento",
+        label1="Ações filtradas",
+        label2="Total R$ (Mi)"
+    )
+
+
+def gui_filter_category(df, col):
+    from pishne.gui import dropdown_filter
+    dropdown_filter(
+        df=df,
+        column=colr,
+        label1="Ações filtradas",
+    )
+
+def gui_filter(db, field):
+    dc = {
+        "Temática": "nm_tematica",
+        "Componente": "nm_componente",
+        "Subcomponente":"cod_subcomponente"
+    }
+    df = join_db(db=db)
+    gui_filter_category(df=df, col=dc[field])
+
+
 
 
 def export_db2csv(db, folder, filename):
