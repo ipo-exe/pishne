@@ -1494,7 +1494,7 @@ class AcoesRT(RecordTable):
 
     def archive_record(self, cod_acao):
         if cod_acao not in set(self.data["cod_acao"]):
-            print(f"Codigo {cod_acao} não encontrado!")
+            print(f" >>> Código {cod_acao} não encontrado!")
             return False
         else:
             # find action code
@@ -1502,6 +1502,36 @@ class AcoesRT(RecordTable):
             self.edit_record(cod_acao=cod_acao, dict_rec=dict_rec, filter_dict=False)
             self.refresh_data()
             return True
+
+
+    def insert(self, dc_acao):
+        ls_cols = []
+        ls_values = []
+        for k in dc_acao:
+            ls_cols.append(k)
+            ls_values.append(dc_acao[k])
+            if dc_acao[k] is None:
+                print(f" >>> Campo vazio em '{k}'. Inserção cancelada.")
+                return False
+        _df = pd.DataFrame(
+            {
+                "Column": ls_cols,
+                "Valor": ls_values
+            }
+        )
+        print(f" >>> Inserir nova ação:\n")
+        print(_df)
+        print(" >>> Atenção: o arquivo será salvo com as mudanças")
+        s = input(" >>> Confirmar inserção? (s/n) >> ").lower().strip()
+        if s == "s":
+            print(" >>> Inserção autorizada")
+            self.insert_record(dict_rec=dc_acao)
+            print(" >>> Inserção realizada\n")
+            self.save()
+        else:
+            print(" >>> Inserção cancelada\n")
+            return False
+        return True
 
 
     def view_acao(self, cod_acao, dataframe=True):
