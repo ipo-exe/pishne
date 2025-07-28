@@ -1,5 +1,5 @@
 import pandas as pd
-from ipywidgets import interact, IntSlider
+from ipywidgets import interact, IntSlider, Button, VBox
 from IPython.display import display, HTML
 
 def slider_filter(df, column):
