@@ -1,6 +1,6 @@
 import pandas as pd
 from ipywidgets import IntSlider, Dropdown, Button, VBox, Output, Text, Layout, FloatText
-from IPython.display import display, HTML
+from IPython.display import display, HTML, clear_output
 import pandas as pd
 from google.colab import files
 
