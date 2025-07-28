@@ -55,13 +55,14 @@ def slider_filter(df, column, label1="Filtrados", label2="Total"):
     display(ui)
 
 
-def dropdown_filter(df, column, label1="Filtrados", label2="Total", value_column=None, contains=False):
+def dropdown_filter(df, column, label1="Filtrados", label2="Total", value_column=None, contains=False, options=None):
     """
     Creates a dropdown filter for a qualitative column.
     Displays summary and allows CSV export of the filtered data.
     """
     # Unique values for dropdown
-    unique_values = sorted(df[column].dropna().unique())
+    if options is None:
+        unique_values = sorted(df[column].dropna().unique())
 
     # Widgets
     dropdown = Dropdown(options=['All'] + unique_values, description=column)
@@ -81,7 +82,7 @@ def dropdown_filter(df, column, label1="Filtrados", label2="Total", value_column
             else:
                 if contains:
                     # Case-insensitive substring match
-                    current_filtered = df[df[column].astype(str).str.contains(dropdown.value, case=False, na=False)]
+                    current_filtered = df[df[column].astype(str).str.contains(dropdown.value, case=True, na=False)]
                 else:
                     current_filtered = df[df[column] == dropdown.value]
 

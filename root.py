@@ -1610,7 +1610,7 @@ def gui_filter_value(db):
     )
 
 
-def gui_filter_category(df, col, contains):
+def gui_filter_category(df, col, contains, options):
     from pishne.gui import dropdown_filter
     dropdown_filter(
         df=df,
@@ -1618,7 +1618,8 @@ def gui_filter_category(df, col, contains):
         label1="Ações filtradas",
         label2="Total R$ (Mi)",
         value_column="valor_investimento",
-        contains=contains
+        contains=contains,
+        options=options
     )
 
 def gui_filter(db, field):
@@ -1632,16 +1633,25 @@ def gui_filter(db, field):
     df = join_db(db=db)
     column = dc[field]
     b_contains = False
+    ls_options = None
     if column == "escala_acao":
         b_contains = True
-    gui_filter_category(df=df, col=dc[field], contains=b_contains)
+        ls_options = sorted(db["escala"].data["escala_acao"].unique())
+    # call gui
+    gui_filter_category(
+        df=df,
+        col=dc[field],
+        contains=b_contains,
+        options=ls_options
+    )
 
 
 
-
-def export_db2csv(db, folder, filename):
+def export_db2csv(db):
+    from pishne.gui import download
     jdf = join_db(db)
-    jdf.to_csv(f"{folder}/{filename}.csv", sep=";", index=False, encoding="utf-8")
+    download(df=jdf, filename="pishne_data.csv")
+
 
 
 # deprecated
