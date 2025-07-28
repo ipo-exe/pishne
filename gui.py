@@ -1,8 +1,11 @@
 import pandas as pd
-from ipywidgets import IntSlider, Dropdown, Button, VBox, Output, Text
+from ipywidgets import IntSlider, Dropdown, Button, VBox, Output, Text, Layout
 from IPython.display import display, HTML
 import pandas as pd
 from google.colab import files
+
+import root
+
 
 def slider_filter(df, column, label1="Filtrados", label2="Total"):
     """
@@ -177,3 +180,137 @@ def download(df, filename="data.csv"):
 
     export_button.on_click(export_csv)
     display(export_button)
+
+
+def selector(db, sub="origem"):
+    origem_investimento = widgets.Dropdown(
+        options=db["origem"].data["origem_investimento"].unique(),
+        value='Estados',
+        description='Origem:'
+    )
+    # Display the form
+    form_items = widgets.VBox([
+        origem_investimento,
+    ])
+
+    display(form_items)
+
+
+# Callback function
+def handle_selection(data):
+    return data
+
+
+def action_form(db):
+    df = pishne.join_db(db)
+
+    df["cde_componente"] = df['cod_componente'] + ' -- ' + df['desc_componente']
+    df["cde_subcomponente"] = df['cod_subcomponente'] + ' -- ' + df['desc_subcomponente']
+
+    hierarchy = ['cde_componente', 'cde_subcomponente', 'nm_tematica']
+    hierarchy_labels = {
+        'cde_componente': "Componente",
+        'cde_subcomponente': "Sub-componente",
+        'nm_tematica': "Temática"
+    }
+    widgets_dict = {}
+    for col in hierarchy:
+        widgets_dict[col] = widgets.Dropdown(
+            description="{}:".format(hierarchy_labels[col]),
+            options=['Select'],
+            layout=widgets.Layout(width='800px'),
+            style={'description_width': '150px'}
+        )
+
+    # Update function for cascading effect
+    def update_options(change, current_col):
+        current_idx = hierarchy.index(current_col)
+        if current_idx + 1 < len(hierarchy):
+            next_col = hierarchy[current_idx + 1]
+            # Filter df based on previous selections
+            filtered_df = df.copy()
+            for col in hierarchy[:current_idx + 1]:
+                if widgets_dict[col].value != 'Select':
+                    filtered_df = filtered_df[filtered_df[col] == widgets_dict[col].value]
+            next_options = sorted(filtered_df[next_col].dropna().unique().tolist())
+            widgets_dict[next_col].options = ['Select'] + next_options
+
+            # Reset deeper dropdowns
+            for deeper_col in hierarchy[current_idx + 2:]:
+                widgets_dict[deeper_col].options = ['Select']
+
+    # Attach observers
+    for col in hierarchy[:-1]:
+        widgets_dict[col].observe(lambda change, c=col: update_options(change, c), 'value')
+
+    all_cols = hierarchy.copy()
+    # descrição
+    desc_acao = widgets.Text(
+        description='Descrição:',
+        layout=widgets.Layout(width='800px'),
+        style={'description_width': '150px'},
+    )
+    widgets_dict["desc_acao"] = desc_acao
+    all_cols = all_cols + ["desc_acao"]
+
+    # valor investimento
+    valor_investimento = widgets.FloatText(
+        description='Investimento (Mi R$):',
+        layout=widgets.Layout(width='800px'),
+        style={'description_width': '150px'},
+    )
+    widgets_dict['valor_investimento'] = valor_investimento
+    all_cols = all_cols + ['valor_investimento']
+
+    # origem
+    options_origem = sorted(db["origem"].data["origem_investimento"].unique())
+    origem_investimento = widgets.Dropdown(
+        options=options_origem,
+        value=options_origem[0],
+        description='Origem:',
+        layout=widgets.Layout(width='800px'),
+        style={'description_width': '150px'}
+    )
+    widgets_dict['origem_investimento'] = origem_investimento
+    all_cols = all_cols + ['origem_investimento']
+
+    # escala
+    options_escala = sorted(db["escala"].data["escala_acao"].unique())
+    escala_acao = widgets.Dropdown(
+        options=options_escala,
+        value="Todos Estados",
+        description='Escala:',
+        layout=widgets.Layout(width='800px'), style={'description_width': '150px'}
+    )
+    widgets_dict['escala_acao'] = escala_acao
+    all_cols = all_cols + ['escala_acao']
+
+    # Initial options for the first dropdown
+    first_col = hierarchy[0]
+    widgets_dict[first_col].options = ['Select'] + sorted(df[first_col].dropna().unique().tolist())
+
+    # Submit and capture values
+    output = widgets.Output()
+    submit_button = widgets.Button(description="Submit", button_style="success")
+    form_data = {}
+
+    def on_submit(b):
+        with output:
+            clear_output()
+            for key, w in widgets_dict.items():
+                v = w.value
+                if "cde_" in key:
+                    v = v.split(" -- ")[0]
+                    key = key.replace("cde_", "cod_")
+                if v == 'Select':
+                    v = None
+                form_data[key] = v
+            print("Formulário submetido")
+
+    submit_button.on_click(on_submit)
+
+    # Layout
+    form_items = [widgets_dict[col] for col in all_cols] + [submit_button, output]
+    display(widgets.VBox(form_items))
+
+    return form_data

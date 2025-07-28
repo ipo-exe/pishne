@@ -1551,6 +1551,8 @@ class AcoesRT(RecordTable):
                 self.refresh_data()
                 print(" >>> Edição realizada\n")
                 self.save()
+                print(f" >>> Ação '{cod_acao}' atualizada:")
+                print(self.view_acao(cod_acao=cod_acao))
                 return True
             else:
                 print(" >>> Edição cancelada\n")
@@ -1725,6 +1727,10 @@ def gui_filter(db, field):
         contains=b_contains,
         options=ls_options
     )
+
+def gui_form(db):
+    from pishne.gui import action_form
+    action_form(db=db)
 
 
 def export_db2csv(db, use_gui=True, folder=None):
