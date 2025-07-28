@@ -1,5 +1,5 @@
 import pandas as pd
-from ipywidgets import IntSlider, Dropdown, Button, VBox, Output
+from ipywidgets import IntSlider, Dropdown, Button, VBox, Output, Text
 from IPython.display import display, HTML
 import pandas as pd
 from google.colab import files
@@ -119,6 +119,50 @@ def dropdown_filter(df, column, label1="Filtrados", label2="Total", value_column
     # Layout
     ui = VBox([dropdown, export_button, output])
     display(ui)
+
+
+def create_dynamic_form(df, text_fields=None, dropdown_fields=None, on_submit_callback=None):
+    """
+    Creates a dynamic form where:
+    - text_fields: list of column names for text inputs
+    - dropdown_fields: list of column names for dropdowns (auto-populated with unique values)
+    - on_submit_callback: function that receives a dict with form data
+    """
+
+    # Create widgets dynamically
+    widgets_dict = {}
+
+    # Text inputs
+    if text_fields:
+        for field in text_fields:
+            widgets_dict[field] = Text(description=f'{field}:')
+
+    # Dropdowns populated from DataFrame
+    if dropdown_fields:
+        for field in dropdown_fields:
+            options = sorted(df[field].dropna().unique().tolist())
+            widgets_dict[field] = Dropdown(options=options, description=f'{field}:')
+
+    # Submit button and output
+    submit_button = Button(description='Submit', button_style='success')
+    output = Output()
+
+    # On click
+    def on_submit(b):
+        with output:
+            clear_output()
+            form_data = {key: widget.value for key, widget in widgets_dict.items()}
+            if on_submit_callback:
+                on_submit_callback(form_data)
+            else:
+                print("Form data:", form_data)
+
+    submit_button.on_click(on_submit)
+
+    # Layout
+    form_items = list(widgets_dict.values()) + [submit_button, output]
+    form_box = VBox(form_items)
+    display(form_box)
 
 
 def download(df, filename="data.csv"):

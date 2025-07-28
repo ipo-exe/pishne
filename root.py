@@ -1,9 +1,13 @@
 import datetime
 import glob
 import os
+import pprint
 from pathlib import Path
 import geopandas as gpd
 import pandas as pd
+
+from gui import create_dynamic_form
+
 
 class MbaE:
     """
@@ -917,7 +921,8 @@ class RecordTable(DataSet):
         return None
 
     def save(self):
-        """Save the data to the sourced file data.
+        """
+        Save the data to the sourced file data.
 
         .. danger::
 
@@ -1099,7 +1104,8 @@ class RecordTable(DataSet):
             return df_merged
 
     def insert_record(self, dict_rec):
-        """Insert a record in the RT
+        """
+        Insert a record in the RT
 
         :param dict_rec: input record dictionary
         :type dict_rec: dict
@@ -1130,7 +1136,8 @@ class RecordTable(DataSet):
         return None
 
     def edit_record(self, rec_id, dict_rec, filter_dict=True):
-        """Edit RT record
+        """
+        Edit RT record
 
         :param rec_id: record id
         :type rec_id: str
@@ -1490,16 +1497,92 @@ class AcoesRT(RecordTable):
     def archive_record(self, cod_acao):
         if cod_acao not in set(self.data["cod_acao"]):
             print(f"Codigo {cod_acao} não encontrado!")
+            return False
         else:
             # find action code
             dict_rec = {self.recstatus_field: "Off"}
             self.edit_record(cod_acao=cod_acao, dict_rec=dict_rec, filter_dict=False)
             self.refresh_data()
-        return None
+            return True
 
 
+    def view_acao(self, cod_acao, dataframe=True):
+            df_q = self.data.query(f"cod_acao == '{cod_acao}'").copy()
+            ls_cols = [c for c in df_q.columns]
+            ls_values = [df_q[c].values[0] for c in df_q.columns]
+
+            if dataframe:
+                output = {
+                    "Coluna": ls_cols,
+                    "Valor": ls_values
+                }
+                output = pd.DataFrame(output)
+            else:
+                output = {}
+                for c in ls_cols:
+                    output[c] = df_q[c].values[0]
+            return output
 
 
+    def edit(self, cod_acao, dc_acao):
+        print(f"\n\n >>> Editar ação '{cod_acao}'")
+
+        if cod_acao not in set(self.data["cod_acao"]):
+            print(f" >>> Código '{cod_acao}' não encontrado!")
+            print(" >>> Remoção cancelada")
+            return False
+        else:
+            dc_acao_old = self.view_acao(cod_acao=cod_acao, dataframe=False)
+            df_acao_new = pd.DataFrame(
+                {"Coluna": [k for k in dc_acao],
+                 "Valor atual": [dc_acao_old[k] for k in dc_acao],
+                 "Valor novo": [dc_acao[k] for k in dc_acao]
+                 }
+            )
+            print(f" >>> Ação '{cod_acao}' encontrada:\n")
+            print(self.view_acao(cod_acao=cod_acao))
+            print("\n >>> Novo atributos:")
+            print(df_acao_new)
+            print("\n")
+            print(" >>> Atenção: o arquivo será salvo com as mudanças")
+            s = input(" >>> Confirmar edição? (s/n) >> ").lower().strip()
+            if s == "s":
+                print(" >>> Edição autorizada")
+                # find action code
+                self.edit_record(cod_acao=cod_acao, dict_rec=dc_acao, filter_dict=False)
+                self.refresh_data()
+                print(" >>> Edição realizada\n")
+                self.save()
+                return True
+            else:
+                print(" >>> Edição cancelada\n")
+                return False
+
+
+    def remove(self, cod_acao):
+        print(f"\n\n >>> Remover ação '{cod_acao}'")
+        if cod_acao not in set(self.data["cod_acao"]):
+            print(f" >>> Código '{cod_acao}' não encontrado!")
+            print(" >>> Remoção cancelada")
+            return False
+        else:
+            print(f" >>> Ação '{cod_acao}' encontrada:\n")
+            print(self.view_acao(cod_acao=cod_acao))
+            print("\n")
+            print(" >>> Atenção: o arquivo será salvo com as mudanças")
+            s = input(" >>> Confirmar remoção? (s/n) >> ").lower().strip()
+            if s == "s":
+                print(" >>> Remoção autorizada")
+                # find action code
+                dict_rec = {self.recstatus_field: "Off"}
+                self.edit_record(cod_acao=cod_acao, dict_rec=dict_rec, filter_dict=False)
+                self.refresh_data()
+                print(" >>> Remoção realizada\n")
+                self.save()
+                return True
+            else:
+                print(" >>> Remoção cancelada\n")
+                return False
 
 
 class OrigemRT(RecordTable):
@@ -1646,12 +1729,15 @@ def gui_filter(db, field):
     )
 
 
-
-def export_db2csv(db):
-    from pishne.gui import download
+def export_db2csv(db, use_gui=True, folder=None):
     jdf = join_db(db)
-    download(df=jdf, filename="pishne_data.csv")
-
+    if use_gui:
+        from pishne.gui import download
+        download(df=jdf, filename="pishne_data.csv")
+    else:
+        if folder is None:
+            folder = "./"
+        jdf.to_csv(f"{folder}/pishne_data.csv", sep=";", encoding="utf-8", index=False)
 
 
 # deprecated
