@@ -1711,6 +1711,50 @@ def join_db(db):
 
     return df_uniao
 
+def expand_db(db):
+    df1 = join_db(db)
+    print(df1.info())
+    print(df1["valor_investimento"].sum())
+    print("^^^^^^^^^^^^^^^^^^^^")
+    ls_ufs = [
+        "MA", "PI", "CE", "RN", "PB", "PE", "AL", "SE", "BA"
+    ]
+    n_ufs = len(ls_ufs)
+    df_escala = db["escala"].data
+    ls_full = []
+    for i in range(len(df_escala)):
+        s_escala = df_escala["escala_acao"].values[i]
+        s_cat = df_escala["categoria"].values[i]
+        #print(s_escala)
+        s_label = "Global"
+        if s_cat == "UF" and s_escala in ls_ufs:
+            filtered_df1 = df1[df1['escala_acao'].str.contains(s_escala, case=True)].copy()
+            s_label = s_escala[:]
+            filtered_df1["escala_local"] = s_label
+        elif s_cat == "UF" and s_escala == "Todos Estados":
+            filtered_df1 = df1[df1['escala_acao'].str.contains(s_escala, case=True, regex=False)].copy()
+            ls_news = []
+            for uf in ls_ufs:
+                filtered_df2 = filtered_df1.copy()
+                filtered_df2["escala_local"] = uf
+                ls_news.append(filtered_df2.copy())
+            filtered_df1 = pd.concat(ls_news).reset_index(drop=True)
+        else:
+            s_label == "all"
+            filtered_df1 = df1[df1['escala_acao'].str.contains(s_escala, case=True, regex=False)].copy()
+            filtered_df1["escala_local"] = s_label
+        #print(filtered_df1[["cod_acao", "valor_investimento", "escala_acao", "escala_local"]])
+        #print("\n")
+        ls_full.append(filtered_df1.copy())
+
+    df_full = pd.concat(ls_full).reset_index(drop=True)
+    df_full = df_full.sort_values(by="cod_acao").reset_index(drop=True)
+    print(df_full.info())
+    print(df_full["valor_investimento"].sum())
+    print("^^^^^^^^^^^^^^^^^^^^")
+    print(df_full.head(20))
+
+
 
 def gui_filter_value(db):
     from pishne.gui import slider_filter

@@ -273,7 +273,7 @@ def action_form(db, df):
     all_cols = all_cols + ['origem_investimento']
 
     # escala
-    options_escala = sorted(db["escala"].data["escala_acao"].unique())
+    options_escala = sorted(db["escala"].data["escala_acao"].unique()) + ["Mix de Estados (preencher abaixo)"]
     escala_acao = Dropdown(
         options=options_escala,
         value="Todos Estados",
@@ -282,6 +282,16 @@ def action_form(db, df):
     )
     widgets_dict['escala_acao'] = escala_acao
     all_cols = all_cols + ['escala_acao']
+
+    # mix
+    mix_estados = Text(
+        description="Mix de Estados (ex: 'SE & PE'):",
+        value="SE & PE (exemplo)",
+        layout=Layout(width='800px'),
+        style={'description_width': '150px'},
+    )
+    widgets_dict["mix"] = mix_estados
+    all_cols = all_cols + ["mix"]
 
     # Initial options for the first dropdown
     first_col = hierarchy[0]
@@ -303,6 +313,11 @@ def action_form(db, df):
                 if v == 'Select':
                     v = None
                 form_data[key] = v
+            # handle mix
+            if form_data["escala_acao"] == "Mix de Estados (preencher abaixo)":
+                form_data["escala_acao"] = form_data["mix"][:]
+                del form_data["mix"]
+
             print("Formulário submetido")
 
     submit_button.on_click(on_submit)
