@@ -1,6 +1,8 @@
 import pandas as pd
-from ipywidgets import interact, IntSlider, Button, VBox
+from ipywidgets import IntSlider, Button, VBox, Output
 from IPython.display import display, HTML
+import pandas as pd
+from google.colab import files
 
 def slider_filter(df, column):
     """
