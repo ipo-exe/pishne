@@ -270,10 +270,10 @@ def action_form(db, df):
     all_cols = all_cols + ['origem_investimento']
 
     # escala
-    options_escala = db["escala"].data["escala_acao"].unique() + ["Mix de Estados (preencher abaixo)"]
+    options_escala = sorted(db["escala"].data["escala_acao"].unique()) + ["Mix de Estados (preencher abaixo)"]
     escala_acao = Dropdown(
         options=options_escala,
-        value=options_escala[0],
+        value="Nordeste (cárater regional)",
         description='Escala:',
         layout=Layout(width='800px'),
         style={'description_width': '200px'}
