@@ -1,5 +1,5 @@
 import pandas as pd
-from ipywidgets import IntSlider, Dropdown, Button, VBox, Output, Text, Layout
+from ipywidgets import IntSlider, Dropdown, Button, VBox, Output, Text, Layout, FloatText
 from IPython.display import display, HTML
 import pandas as pd
 from google.colab import files
@@ -213,10 +213,10 @@ def action_form(db, df):
     }
     widgets_dict = {}
     for col in hierarchy:
-        widgets_dict[col] = widgets.Dropdown(
+        widgets_dict[col] = Dropdown(
             description="{}:".format(hierarchy_labels[col]),
             options=['Select'],
-            layout=widgets.Layout(width='800px'),
+            layout=Layout(width='800px'),
             style={'description_width': '150px'}
         )
 
@@ -243,7 +243,7 @@ def action_form(db, df):
 
     all_cols = hierarchy.copy()
     # descrição
-    desc_acao = widgets.Text(
+    desc_acao = Text(
         description='Descrição:',
         layout=widgets.Layout(width='800px'),
         style={'description_width': '150px'},
@@ -252,7 +252,7 @@ def action_form(db, df):
     all_cols = all_cols + ["desc_acao"]
 
     # valor investimento
-    valor_investimento = widgets.FloatText(
+    valor_investimento = FloatText(
         description='Investimento (Mi R$):',
         layout=widgets.Layout(width='800px'),
         style={'description_width': '150px'},
@@ -262,11 +262,11 @@ def action_form(db, df):
 
     # origem
     options_origem = sorted(db["origem"].data["origem_investimento"].unique())
-    origem_investimento = widgets.Dropdown(
+    origem_investimento = Dropdown(
         options=options_origem,
         value=options_origem[0],
         description='Origem:',
-        layout=widgets.Layout(width='800px'),
+        layout=Layout(width='800px'),
         style={'description_width': '150px'}
     )
     widgets_dict['origem_investimento'] = origem_investimento
@@ -274,11 +274,11 @@ def action_form(db, df):
 
     # escala
     options_escala = sorted(db["escala"].data["escala_acao"].unique())
-    escala_acao = widgets.Dropdown(
+    escala_acao = Dropdown(
         options=options_escala,
         value="Todos Estados",
         description='Escala:',
-        layout=widgets.Layout(width='800px'), style={'description_width': '150px'}
+        layout=Layout(width='800px'), style={'description_width': '150px'}
     )
     widgets_dict['escala_acao'] = escala_acao
     all_cols = all_cols + ['escala_acao']
@@ -288,8 +288,8 @@ def action_form(db, df):
     widgets_dict[first_col].options = ['Select'] + sorted(df[first_col].dropna().unique().tolist())
 
     # Submit and capture values
-    output = widgets.Output()
-    submit_button = widgets.Button(description="Submit", button_style="success")
+    output = Output()
+    submit_button = Button(description="Submit", button_style="success")
     form_data = {}
 
     def on_submit(b):
@@ -309,6 +309,6 @@ def action_form(db, df):
 
     # Layout
     form_items = [widgets_dict[col] for col in all_cols] + [submit_button, output]
-    display(widgets.VBox(form_items))
+    display(VBox(form_items))
 
     return form_data
