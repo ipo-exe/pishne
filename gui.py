@@ -4,8 +4,6 @@ from IPython.display import display, HTML
 import pandas as pd
 from google.colab import files
 
-import root
-
 
 def slider_filter(df, column, label1="Filtrados", label2="Total"):
     """
