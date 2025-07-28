@@ -62,10 +62,10 @@ def dropdown_filter(df, column, label1="Filtrados", label2="Total", value_column
     """
     # Unique values for dropdown
     if options is None:
-        unique_values = sorted(df[column].dropna().unique())
+        options = sorted(df[column].dropna().unique())
 
     # Widgets
-    dropdown = Dropdown(options=['All'] + unique_values, description=column)
+    dropdown = Dropdown(options=['All'] + options, description=column)
     export_button = Button(description="Download CSV", button_style='success')
     output = Output()
 
