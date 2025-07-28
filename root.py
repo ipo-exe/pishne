@@ -1497,6 +1497,14 @@ class AcoesRT(RecordTable):
             self.refresh_data()
         return None
 
+    def gui_filter_value(self):
+        from gui import slider_filter
+        df = self.data[self.columns_data_main]
+        slider_filter(df=df, column="valor_investimento")
+
+
+
+
 class OrigemRT(RecordTable):
 
     def __init__(self):
@@ -1545,8 +1553,10 @@ def get_tables():
         "origem": OrigemRT(),
     }
 
+
 def get_layer_names():
     return list(get_tables().keys())
+
 
 def load_db(folder):
     print(">> carregando dados ...")
@@ -1569,6 +1579,7 @@ def load_db(folder):
         print("Atenção! Arquivo do banco de dados não encontrado.")
         return None
 
+
 def join_db(db):
     # obter dados
     gdf_acoes = db["acoes"].view(filter_status=True)
@@ -1590,10 +1601,10 @@ def join_db(db):
 
     return df_uniao
 
+
 def export_db2csv(db, folder, filename):
     jdf = join_db(db)
     jdf.to_csv(f"{folder}/{filename}.csv", sep=";", index=False, encoding="utf-8")
-
 
 
 # deprecated
