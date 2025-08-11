@@ -4,7 +4,7 @@ from ipywidgets import IntSlider, Dropdown, Button, VBox, Output, Text, Layout, 
 from IPython.display import display, HTML, clear_output
 import pandas as pd
 from google.colab import files
-
+from zoneinfo import ZoneInfo
 
 def get_timestamp(mode="record"):
     """Return a string timestamp
@@ -13,7 +13,7 @@ def get_timestamp(mode="record"):
     :rtype: str
     """
     # compute timestamp
-    _now = datetime.datetime.now()
+    _now = datetime.datetime.now(ZoneInfo("America/Sao_Paulo"))
     if mode == "record":
         return str(_now.strftime("%Y-%m-%d %H:%M:%S"))
     elif mode == "file":
@@ -201,7 +201,8 @@ def download(df, filename="data.csv", filter=False):
         filename = "pishne_data_" + get_timestamp(mode="file") + ".csv"
         if filter:
             filename = "resumo_" + filename
-        print(filename)
+        print("ATENÇÃO: para dados atualizados, é preciso executar a célula novamente")
+        print(f"Baixando: {filename}")
         df.to_csv(filename, index=False, sep=";", encoding="utf-8")
         files.download(filename)
 
@@ -209,7 +210,8 @@ def download(df, filename="data.csv", filter=False):
         filename = "pishne_data_" + get_timestamp(mode="file") + ".xlsx"
         if filter:
             filename = "resumo_" + filename
-        print(filename)
+        print("ATENÇÃO: para dados atualizados, é preciso executar a célula novamente")
+        print(f"Baixando: {filename}")
         df.to_excel(filename, index=False, engine="openpyxl")
         files.download(filename)
 

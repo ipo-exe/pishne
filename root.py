@@ -1538,6 +1538,7 @@ class AcoesRT(RecordTable):
             self.insert_record(dict_rec=dc_acao)
             print(" >>> Inserção realizada\n")
             self.save()
+            print(" >>> Ação recomendada: baixar versão atual do banco de dados\n")
         else:
             print(" >>> Inserção cancelada\n")
             return False
