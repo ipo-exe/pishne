@@ -1278,13 +1278,17 @@ class RecordTable(DataSet):
         df.to_csv(filepath, sep=self.file_data_sep, index=False)
         return filepath
 
-    def view(self, filter_status=True, recent=None):
+    def view(self, filter_status=True, recent=None, deleted=False, short=False):
         df = self.data.copy()
-        df = df.query(f"{self.recstatus_field} == 'On'").copy().reset_index(drop=True)
+        s_query = "On"
+        if deleted:
+            s_query = "Off"
+        df = df.query(f"{self.recstatus_field} == '{s_query}'").copy().reset_index(drop=True)
         if recent is not None:
             df = df.sort_values(by="RecTimestamp", ascending=False)
             df = df.head(recent)
-        df.drop(columns=self.columns_base, inplace=True)
+        if short:
+            df.drop(columns=self.columns_base, inplace=True)
         return df
 
     # ----------------- STATIC METHODS ----------------- #
@@ -1595,10 +1599,10 @@ class AcoesRT(RecordTable):
     def remove(self):
         print(" >>> ATENÇÃO:\nAo remover uma ação, os códigos das ações\nserão recalculados no banco de dados.")
         while True:
-            s = input("\n >>> Digite 'ok' para prosseguir >> ").lower().strip()
+            s = input("\n >>> Digite 'ok' para prosseguir >>  ").lower().strip()
             if s == "ok":
                 break
-        cod_acao = input("\n >>> Especifique o código da ação (ex: 4.2.1): >>").lower().strip()
+        cod_acao = input("\n >>> Especifique o código da ação (ex: 'acao 4.2.1'): >>  ").lower().strip().replace("'", "")
         print(f"\n >>> Remover ação '{cod_acao}'")
         if cod_acao not in set(self.data["cod_acao"]):
             print(f" >>> Código '{cod_acao}' não encontrado!")
@@ -1609,7 +1613,7 @@ class AcoesRT(RecordTable):
             print(self.view_acao(cod_acao=cod_acao))
             print("\n")
             print(" >>> ATENÇÃO: o arquivo será salvo com a mudança")
-            s = input(" >>> Confirmar remoção? (s/n) >> ").lower().strip()
+            s = input(" >>> Confirmar remoção? (s/n) >>  ").lower().strip()
             if s == "s":
                 print(" >>> Remoção autorizada")
                 # find action code
