@@ -193,14 +193,14 @@ def download(df, filename="data.csv"):
     export_button = Button(description=f"Download {s_aux}", button_style='success')
 
     def export_csv(b):
-        ls_file = filename.split("_")
-        filename = ls_file[0] + "_" + ls_file[1] + "_" + get_timestamp(mode="file") + ".csv"
+        filename = "pishne_data_" + get_timestamp(mode="file") + ".csv"
+        print(filename)
         df.to_csv(filename, index=False, sep=";", encoding="utf-8")
         files.download(filename)
 
     def export_xlsx(b):
-        ls_file = filename.split("_")
-        filename = ls_file[0] + "_" + ls_file[1] + "_" + get_timestamp(mode="file") + ".xlsx"
+        filename = "pishne_data_" + get_timestamp(mode="file") + ".xlsx"
+        print(filename)
         df.to_excel(filename, index=False, engine="openpyxl")
         files.download(filename)
 
