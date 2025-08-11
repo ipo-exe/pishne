@@ -188,23 +188,27 @@ def download(df, filename="data.csv"):
     elif s_extension == "xlsx":
         s_aux = "Excel"
     elif s_extension == "gpkg":
-        s_aux = "Geopackage"
+        s_aux = "GPKG"
 
     export_button = Button(description=f"Download {s_aux}", button_style='success')
 
     def export_csv(b):
+        ls_file = filename.split("_")
+        filename = ls_file[0] + "_" + ls_file[1] + "_" + get_timestamp(mode="file") + ".csv"
         df.to_csv(filename, index=False, sep=";", encoding="utf-8")
         files.download(filename)
 
     def export_xlsx(b):
+        ls_file = filename.split("_")
+        filename = ls_file[0] + "_" + ls_file[1] + "_" + get_timestamp(mode="file") + ".xlsx"
         df.to_excel(filename, index=False, engine="openpyxl")
         files.download(filename)
 
     def export_geo(b):
         filename2 = filename.replace("_db_0", "_db_{}".format(get_timestamp(mode="file")))
         shutil.copy(
-            src=f"{folder}/{filename}",
-            dst=f"{folder}/{filename2}",
+            src=filename,
+            dst=filename2,
         )
         files.download(filename2)
 
@@ -356,7 +360,7 @@ def action_form(db, df):
                 del form_data["mix"]
 
             print(" >>> Formulário submetido.")
-            print(" >>> Consolidar inserção abaixo.")
+            print(" >>> ATENÇÃO: consolidar inserção abaixo.")
 
     submit_button.on_click(on_submit)
 

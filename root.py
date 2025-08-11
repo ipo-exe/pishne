@@ -1739,9 +1739,8 @@ def join_db(db):
 
     # reorganizar ordem das colunas
     c1 = list(df_uniao.columns)
-    c2 = c1[0:1] + c1[-2:] + c1[1:2] + c1[-3:-2] + c1[2:-3]
-    df_uniao = df_uniao[c2]
-
+    c2 = c1[0:5] + c1[-2:] + c1[5:6] + c1[-3:-2] + c1[6:-3]
+    df_uniao = df_uniao[c2].copy()
     return df_uniao
 
 def expand_db(db):
