@@ -1592,17 +1592,23 @@ class AcoesRT(RecordTable):
                 return False
 
 
-    def remove(self, cod_acao):
-        print(f"\n\n >>> Remover ação '{cod_acao}'")
+    def remove(self):
+        print(" >>> ATENÇÃO:\nAo remover uma ação, os códigos das ações\nserão recalculados no banco de dados.")
+        while True:
+            s = input("\n >>> Digite 'ok' para prosseguir >> ").lower().strip()
+            if s == "ok":
+                break
+        cod_acao = input("\n >>> Especifique o código da ação (ex: 4.2.1): >>").lower().strip()
+        print(f"\n >>> Remover ação '{cod_acao}'")
         if cod_acao not in set(self.data["cod_acao"]):
             print(f" >>> Código '{cod_acao}' não encontrado!")
-            print(" >>> Remoção cancelada")
+            print(" >>> Remoção cancelada.")
             return False
         else:
             print(f" >>> Ação '{cod_acao}' encontrada:\n")
             print(self.view_acao(cod_acao=cod_acao))
             print("\n")
-            print(" >>> Atenção: o arquivo será salvo com as mudanças")
+            print(" >>> ATENÇÃO: o arquivo será salvo com a mudança")
             s = input(" >>> Confirmar remoção? (s/n) >> ").lower().strip()
             if s == "s":
                 print(" >>> Remoção autorizada")
