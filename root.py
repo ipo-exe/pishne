@@ -864,7 +864,7 @@ class RecordTable(DataSet):
         return self.columns_base + self.columns_data
 
     @staticmethod
-    def get_timestamp():
+    def get_timestamp(mode="record"):
         """Return a string timestamp
 
         :return: full timestamp text %Y-%m-%d %H:%M:%S
@@ -872,7 +872,10 @@ class RecordTable(DataSet):
         """
         # compute timestamp
         _now = datetime.datetime.now()
-        return str(_now.strftime("%Y-%m-%d %H:%M:%S"))
+        if mode == "record":
+            return str(_now.strftime("%Y-%m-%d %H:%M:%S"))
+        elif mode == "file":
+            return str(_now.strftime("%Y-%m-%d-T%Hh%Mm%Ss"))
 
     def _last_id_int(self):
         """Compute the last ID integer in the record data table.
@@ -1559,7 +1562,24 @@ class AcoesRT(RecordTable):
             return output
 
 
+    def select(self):
+        print(f" >>> Selecionar ação por código")
+        cod_acao = input("\n >>> Especifique o código da ação (ex: 'acao 4.2.1'): >>  ").lower().strip().replace("'", "")
+        if cod_acao not in set(self.data["cod_acao"]):
+            print(f" >>> Código '{cod_acao}' não encontrado!")
+            print(" >>> Seleção cancelada.")
+            return False
+        else:
+            print(f" >>> Ação '{cod_acao}' encontrada:\n")
+            print(self.view_acao(cod_acao=cod_acao))
+            print("\n")
+            return cod_acao
+
+
     def edit(self, cod_acao, dc_acao):
+        if not cod_acao:
+            cod_acao = 'nan'
+
         print(f"\n\n >>> Editar ação '{cod_acao}'")
 
         if cod_acao not in set(self.data["cod_acao"]):
@@ -1864,14 +1884,25 @@ def gui_form(db):
 
 def export_db2csv(db, use_gui=True, folder=None):
     jdf = join_db(db)
+    fnm = "pishne_data_{}.csv".format(RecordTable.get_timestamp(mode="file"))
     if use_gui:
         from pishne.gui import download
-        download(df=jdf, filename="pishne_data.csv")
+        download(df=jdf, filename=fnm)
     else:
         if folder is None:
             folder = "./"
-        jdf.to_csv(f"{folder}/pishne_data.csv", sep=";", encoding="utf-8", index=False)
+        jdf.to_csv(f"{folder}/{fnm}", sep=";", encoding="utf-8", index=False)
 
+def export_db2xlsx(db, use_gui=True, folder=None):
+    jdf = join_db(db)
+    fnm = "pishne_data_{}.xlsx".format(RecordTable.get_timestamp(mode="file"))
+    if use_gui:
+        from pishne.gui import download
+        download(df=jdf, filename=fnm)
+    else:
+        if folder is None:
+            folder = "./"
+        jdf.to_excel(f"{folder}/{fnm}", encoding="utf-8", index=False, engine="openpyxl")
 
 # deprecated
 def __setup_db(folder):

@@ -1,9 +1,23 @@
+import datetime
 import pandas as pd
 from ipywidgets import IntSlider, Dropdown, Button, VBox, Output, Text, Layout, FloatText
 from IPython.display import display, HTML, clear_output
 import pandas as pd
 from google.colab import files
 
+
+def get_timestamp(mode="record"):
+    """Return a string timestamp
+
+    :return: full timestamp text %Y-%m-%d %H:%M:%S
+    :rtype: str
+    """
+    # compute timestamp
+    _now = datetime.datetime.now()
+    if mode == "record":
+        return str(_now.strftime("%Y-%m-%d %H:%M:%S"))
+    elif mode == "file":
+        return str(_now.strftime("%Y-%m-%d-T%Hh%Mm%Ss"))
 
 
 def slider_filter(df, column, label1="Filtrados", label2="Total"):
@@ -16,7 +30,7 @@ def slider_filter(df, column, label1="Filtrados", label2="Total"):
     # Widgets
     min_slider = IntSlider(value=min_val, min=min_val, max=max_val, step=1, description='Min')
     max_slider = IntSlider(value=max_val, min=min_val, max=max_val, step=1, description='Max')
-    export_button = Button(description="Download CSV", button_style='success')
+    export_button = Button(description="Download Excel", button_style='success')
     output = Output()
 
     # Variable to store filtered data
@@ -37,9 +51,9 @@ def slider_filter(df, column, label1="Filtrados", label2="Total"):
             display(HTML(summary_html))
             display(current_filtered)
 
-    def export_csv(b):
-        filename = "filtered_data.csv"
-        current_filtered.to_csv(filename, index=False, sep=";", encoding="utf-8")
+    def export_excel(b):
+        filename = "filtered_data_{}.xlsx".format(get_timestamp(mode="file"))
+        current_filtered.to_excel(filename, index=False, engine="openpyxl", encoding="utf-8")
         files.download(filename)
 
     # Link events
@@ -168,13 +182,26 @@ def download(df, filename="data.csv"):
     """
     Creates a simple button to download the entire DataFrame as CSV.
     """
-    export_button = Button(description="Download CSV", button_style='success')
+    s_extension = filename.split(".")[-1]
+    if s_extension == "csv":
+        s_aux = "CSV"
+    elif s_extension == "xlsx":
+        s_aux = "Excel"
+    export_button = Button(description=f"Download {s_aux}", button_style='success')
 
     def export_csv(b):
         df.to_csv(filename, index=False, sep=";", encoding="utf-8")
         files.download(filename)
 
-    export_button.on_click(export_csv)
+    def export_xlsx(b):
+        df.to_excel(filename, index=False, engine="openpyxl", encoding="utf-8")
+        files.download(filename)
+
+
+    if s_extension == "csv":
+        export_button.on_click(export_csv)
+    elif s_extension == "xlsx":
+        export_button.on_click(export_xlsx)
     display(export_button)
 
 
