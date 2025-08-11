@@ -1,4 +1,4 @@
-import datetime
+import datetime, shutil
 import pandas as pd
 from ipywidgets import IntSlider, Dropdown, Button, VBox, Output, Text, Layout, FloatText
 from IPython.display import display, HTML, clear_output
@@ -53,7 +53,7 @@ def slider_filter(df, column, label1="Filtrados", label2="Total"):
 
     def export_excel(b):
         filename = "filtered_data_{}.xlsx".format(get_timestamp(mode="file"))
-        current_filtered.to_excel(filename, index=False, engine="openpyxl", encoding="utf-8")
+        current_filtered.to_excel(filename, index=False, engine="openpyxl")
         files.download(filename)
 
     # Link events
@@ -187,6 +187,9 @@ def download(df, filename="data.csv"):
         s_aux = "CSV"
     elif s_extension == "xlsx":
         s_aux = "Excel"
+    elif s_extension == "gpkg":
+        s_aux = "Geopackage"
+
     export_button = Button(description=f"Download {s_aux}", button_style='success')
 
     def export_csv(b):
@@ -194,14 +197,23 @@ def download(df, filename="data.csv"):
         files.download(filename)
 
     def export_xlsx(b):
-        df.to_excel(filename, index=False, engine="openpyxl", encoding="utf-8")
+        df.to_excel(filename, index=False, engine="openpyxl")
         files.download(filename)
 
+    def export_geo(b):
+        filename2 = filename.replace("_db_0", "_db_{}".format(get_timestamp(mode="file")))
+        shutil.copy(
+            src=f"{folder}/{filename}",
+            dst=f"{folder}/{filename2}",
+        )
+        files.download(filename2)
 
     if s_extension == "csv":
         export_button.on_click(export_csv)
     elif s_extension == "xlsx":
         export_button.on_click(export_xlsx)
+    elif s_extension == "gpkg":
+        export_button.on_click(export_geo)
     display(export_button)
 
 

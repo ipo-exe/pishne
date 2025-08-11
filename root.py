@@ -1904,6 +1904,22 @@ def export_db2xlsx(db, use_gui=True, folder=None):
             folder = "./"
         jdf.to_excel(f"{folder}/{fnm}", encoding="utf-8", index=False, engine="openpyxl")
 
+def export_db(db, use_gui=True, folder=None):
+    jdf = join_db(db)
+    fnm = "pishne_db_0.gpkg"
+    if use_gui:
+        from pishne.gui import download
+        download(df=jdf, filename=fnm)
+    else:
+        if folder is None:
+            folder = "./"
+        fnm2 = "pishne_db_{}.gpkg".format(RecordTable.get_timestamp(mode="file"))
+        shutil.copy(
+            src=f"{folder}/{fnm}",
+            dst=f"{folder}/{fnm2}",
+        )
+
+
 # deprecated
 def __setup_db(folder):
     # retrieve latest version
