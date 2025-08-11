@@ -1825,6 +1825,9 @@ def summarize(db, subset):
         df_ups = pd.merge(left=df_ups, right=db["componentes"].view(), on=subset, how="left")
     if subset == "cod_subcomponente":
         df_ups = pd.merge(left=df_ups, right=db["subcomponentes"].view(), on=subset, how="left")
+
+    ls_cols = db["acoes"].columns_base
+    df_ups = df_ups.drop(columns=ls_cols)
     return df_ups
 
 

@@ -59,7 +59,7 @@ def slider_filter(df, column, label1="Filtrados", label2="Total"):
     # Link events
     min_slider.observe(update_display, 'value')
     max_slider.observe(update_display, 'value')
-    export_button.on_click(export_csv)
+    export_button.on_click(export_excel)
 
     # Initial display
     update_display()
@@ -122,9 +122,14 @@ def dropdown_filter(df, column, label1="Filtrados", label2="Total", value_column
         current_filtered.to_csv(filename, index=False, sep=";", encoding="utf-8")
         files.download(filename)
 
+    def export_excel(b):
+        filename = "filtered_data_{}.xlsx".format(get_timestamp(mode="file"))
+        current_filtered.to_excel(filename, index=False, engine="openpyxl")
+        files.download(filename)
+
     # Link events
     dropdown.observe(update_display, 'value')
-    export_button.on_click(export_csv)
+    export_button.on_click(export_excel)
 
     # Initial display
     update_display()
@@ -178,7 +183,7 @@ def create_dynamic_form(df, text_fields=None, dropdown_fields=None, on_submit_ca
     display(form_box)
 
 
-def download(df, filename="data.csv"):
+def download(df, filename="data.csv", filter=False):
     """
     Creates a simple button to download the entire DataFrame as CSV.
     """
@@ -194,12 +199,16 @@ def download(df, filename="data.csv"):
 
     def export_csv(b):
         filename = "pishne_data_" + get_timestamp(mode="file") + ".csv"
+        if filter:
+            filename = "resumo_" + filename
         print(filename)
         df.to_csv(filename, index=False, sep=";", encoding="utf-8")
         files.download(filename)
 
     def export_xlsx(b):
         filename = "pishne_data_" + get_timestamp(mode="file") + ".xlsx"
+        if filter:
+            filename = "resumo_" + filename
         print(filename)
         df.to_excel(filename, index=False, engine="openpyxl")
         files.download(filename)
