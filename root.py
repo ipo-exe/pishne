@@ -1823,11 +1823,12 @@ def summarize(db, subset):
     # enhance dataframe
     if subset == "cod_componente":
         df_ups = pd.merge(left=df_ups, right=db["componentes"].view(), on=subset, how="left")
+        ls_cols = db["acoes"].columns_base
+        df_ups = df_ups.drop(columns=ls_cols)
     if subset == "cod_subcomponente":
         df_ups = pd.merge(left=df_ups, right=db["subcomponentes"].view(), on=subset, how="left")
-
-    ls_cols = db["acoes"].columns_base
-    df_ups = df_ups.drop(columns=ls_cols)
+        ls_cols = db["acoes"].columns_base
+        df_ups = df_ups.drop(columns=ls_cols)
     return df_ups
 
 
@@ -1835,6 +1836,8 @@ def summarize(db, subset):
 def gui_filter_value(db):
     from pishne.gui import slider_filter
     df = join_db(db=db)
+    ls_cols = db["acoes"].columns_base
+    df = df.drop(columns=ls_cols)
     slider_filter(
         df=df,
         column="valor_investimento",
@@ -1864,6 +1867,8 @@ def gui_filter(db, field):
         "Escala": "escala_acao"
     }
     df = join_db(db=db)
+    ls_cols = db["acoes"].columns_base
+    df = df.drop(columns=ls_cols)
     column = dc[field]
     b_contains = False
     ls_options = None

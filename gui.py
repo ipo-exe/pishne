@@ -81,7 +81,7 @@ def dropdown_filter(df, column, label1="Filtrados", label2="Total", value_column
 
     # Widgets
     dropdown = Dropdown(options=['All'] + options, description=column)
-    export_button = Button(description="Download CSV", button_style='success')
+    export_button = Button(description="Download Excel", button_style='success')
     output = Output()
 
     # Variable to store filtered data
