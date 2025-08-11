@@ -201,7 +201,7 @@ def download(df, filename="data.csv", filter=False):
         filename = "pishne_data_" + get_timestamp(mode="file") + ".csv"
         if filter:
             filename = "resumo_" + filename
-        print("ATENÇÃO: para dados atualizados, é preciso executar a célula novamente")
+        print("ATENÇÃO: para baixar dados atualizados, é preciso executar a célula novamente")
         print(f"Baixando: {filename}")
         df.to_csv(filename, index=False, sep=";", encoding="utf-8")
         files.download(filename)
@@ -210,7 +210,7 @@ def download(df, filename="data.csv", filter=False):
         filename = "pishne_data_" + get_timestamp(mode="file") + ".xlsx"
         if filter:
             filename = "resumo_" + filename
-        print("ATENÇÃO: para dados atualizados, é preciso executar a célula novamente")
+        print("ATENÇÃO: para baixar dados atualizados, é preciso executar a célula novamente")
         print(f"Baixando: {filename}")
         df.to_excel(filename, index=False, engine="openpyxl")
         files.download(filename)

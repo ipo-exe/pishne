@@ -1744,13 +1744,10 @@ def join_db(db):
     df_uniao = df_uniao[c2].copy()
     return df_uniao
 
+
 def expand_db(db):
     df1 = join_db(db)
-    '''
-    print(df1.info())
-    print(df1["valor_investimento"].sum())
-    print("^^^^^^^^^^^^^^^^^^^^")
-    '''
+
     ls_ufs = [
         "MA", "PI", "CE", "RN", "PB", "PE", "AL", "SE", "BA"
     ]
@@ -1766,6 +1763,7 @@ def expand_db(db):
             filtered_df1 = df1[df1['escala_acao'].str.contains(s_escala, case=True)].copy()
             s_label = s_escala[:]
             filtered_df1["escala_local"] = s_label
+        # simple expansion
         elif s_cat == "UF" and s_escala == "Todos Estados":
             filtered_df1 = df1[df1['escala_acao'].str.contains(s_escala, case=True, regex=False)].copy()
             ls_news = []
@@ -1792,10 +1790,38 @@ def expand_db(db):
     '''
     return df_full
 
-def summarize(db, subset):
+
+def expand_db2(db):
+    df1 = join_db(db)
+    ls_ufs = [
+        "MA", "PI", "CE", "RN", "PB", "PE", "AL", "SE", "BA"
+    ]
+    n_ufs = len(ls_ufs)
+    df_escala = df1["escala_acao"].unique()
+    ls_full = []
+    for i in range(len(df_escala)):
+        s_escala = df_escala[i]
+        filtered_df1 = df1.query(f"escala_acao == '{s_escala}'").copy()
+
+        if s_escala == "Todos Estados":
+            filtered_df1["valor_investimento"] = filtered_df1["valor_investimento"] * n_ufs
+        elif "&" in s_escala:
+            n_escala = len(s_escala.split(" & "))
+            filtered_df1["valor_investimento"] = filtered_df1["valor_investimento"] / n_escala
+        else:
+            pass
+        ls_full.append(filtered_df1.copy())
+    df_full = pd.concat(ls_full).reset_index(drop=True)
+    df_full = df_full.sort_values(by="cod_acao").reset_index(drop=True)
+    return df_full
+
+def summarize(db, subset, full=False):
     if subset == "escala_acao":
         subset = "escala_local"
-    df = expand_db(db=db)
+    if full:
+        df = expand_db(db=db)
+    else:
+        df = expand_db2(db)
     #print(df[["escala_acao", "escala_local"]].sort_values(by="escala_local").head(20))
     # Aggregate stats of "value" field by "label" field
     df_ups = df.groupby(subset)['valor_investimento'].agg(['count', 'sum',]).reset_index()
