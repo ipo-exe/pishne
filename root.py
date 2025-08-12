@@ -1802,16 +1802,25 @@ def expand_db2(db):
     for i in range(len(df_escala)):
         s_escala = df_escala[i]
         filtered_df1 = df1.query(f"escala_acao == '{s_escala}'").copy()
-
         if s_escala == "Todos Estados":
-            filtered_df1["valor_investimento"] = filtered_df1["valor_investimento"] * n_ufs
+            ls_news = []
+            for uf in ls_ufs:
+                filtered_df2 = filtered_df1.copy()
+                filtered_df2["escala_local"] = uf
+                ls_news.append(filtered_df2.copy())
+            filtered_df1 = pd.concat(ls_news).reset_index(drop=True)
         elif "&" in s_escala:
-            n_escala = len(s_escala.split(" & "))
+            ls_ufs2 = s_escala.split(" & ")
+            n_escala = len(ls_ufs2)
+            for uf in ls_ufs:
+                filtered_df2 = filtered_df1.copy()
+                filtered_df2["escala_local"] = uf
+                ls_news.append(filtered_df2.copy())
             filtered_df1["valor_investimento"] = filtered_df1["valor_investimento"] / n_escala
         else:
-            pass
+            filtered_df1["escala_local"] = s_escala
         ls_full.append(filtered_df1.copy())
-    df_full = pd.concat(ls_full).reset_index(drop=True)
+    df_full = pd.concat(ls_full)
     df_full = df_full.sort_values(by="cod_acao").reset_index(drop=True)
     return df_full
 
@@ -1856,6 +1865,7 @@ def summarize(db, subset, full=False):
         df_ups = pd.merge(left=df_ups, right=db["subcomponentes"].view(), on=subset, how="left")
         ls_cols = db["acoes"].columns_base
         df_ups = df_ups.drop(columns=ls_cols)
+    df_ups.reset_index(drop=True, inplace=True)
     return df_ups
 
 
